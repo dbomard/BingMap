@@ -1,6 +1,6 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QGraphicsView, QGraphicsScene
-from PyQt5.QtCore import QRect
+from PyQt5.QtWidgets import QApplication, QWidget, QGraphicsView
+from PyQt5.QtCore import QRect, Qt
 from bing_map import BingMap
 
 
@@ -10,11 +10,13 @@ class Test(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setGeometry(100, 100, 1024, 1024)
+        self.setGeometry(100, 100, 1024, 768)
         self.setWindowTitle("test map")
-        self.scene = BingMap((48.8584, 2.2945), 10, QRect(0, 0, 1024, 1024))
-        self.view = QGraphicsView(self.scene, self)
-        self.view.centerOn(self.scene.get_pixel_center()[0],self.scene.get_pixel_center()[1])
+        scene = BingMap((48.8584, 2.2945), 16, QRect(self.geometry().x(), self.geometry().y(), self.geometry().width(), self.geometry().height()))
+        self.view = QGraphicsView(scene, self)
+        self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.view.centerOn(scene.get_pixel_center()[0],scene.get_pixel_center()[1])
         self.show()
 
 

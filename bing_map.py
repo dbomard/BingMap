@@ -78,7 +78,7 @@ class BingMap(QGraphicsScene):
         """
         img = QPixmap()
         # La tuile est-elle déjà dans le cache ?
-        if not img.load("cache/" + str(quadkey) + ".png", "PNG"):
+        if not img.load("cache/" + str(self.zoom) + '/' + str(quadkey) + ".png", "PNG"):
             # sinon télécharger depuis le serveur
             img = self.download_tile(quadkey)
         return img
