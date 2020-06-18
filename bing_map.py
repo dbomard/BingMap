@@ -8,7 +8,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsPixmapItem
 
 from TileServeur import DataServer
-from TileSystem import LatLongToPixelXY, PixelXYToTileXY, TileXYToQuadKey, TileXYToPixelXY
+from TileSystem import LatLongToPixelXY, PixelXYToTileXY, TileXYToQuadKey, TileXYToPixelXY, PixelXYToLatLong
 
 
 class BingMap(QGraphicsScene):
@@ -57,6 +57,12 @@ class BingMap(QGraphicsScene):
         self.setSceneRect(center[0] - (rect.width() >> 1), center[1] - (rect.height() >> 1), self.surface_x,
                           self.surface_y)
 
+    def move_center(self, delta_x, delta_y):
+        coo_pixel_centre = self.get_pixel_center()
+        coo_pixel_centre = (coo_pixel_centre[0] - delta_x, coo_pixel_centre[1] - delta_y)
+        self.set_coordonnees(PixelXYToLatLong(coo_pixel_centre[0], coo_pixel_centre[1], self.zoom))
+        self.update_view()
+
     def get_pixel_center(self):
         """
         retourne les coordonnées en pixel du centre de la carte
@@ -68,21 +74,25 @@ class BingMap(QGraphicsScene):
         """
         Mise à jour de la vue
         """
-        coo_pixel_centre = self.get_pixel_center()  # 1-calcul des coordonnées en pixel du point central de la carte
-
+        # calcul des coordonnées en pixel du point central de la carte
+        coo_pixel_centre = self.get_pixel_center()
+        # calcul en pixel du point supérieur gauche
         coo_pixel_up_left = (coo_pixel_centre[0] - (self.surface_x >> 1),
-                             coo_pixel_centre[1] - (self.surface_y >> 1))  # 2-calcul en pixel du point supérieur gauche
+                             coo_pixel_centre[1] - (self.surface_y >> 1))
+        # calcul de la tuile du haut à gauche
         coo_tile_up_left = PixelXYToTileXY(coo_pixel_up_left[0],
-                                           coo_pixel_up_left[1])  # 2a-calcul de la tuile en haut à gauche
+                                           coo_pixel_up_left[1])
 
-        coo_pixel_low_right = (coo_pixel_centre[0] + (self.surface_y >> 1), coo_pixel_centre[1] + (
-                self.surface_y >> 1))  # 3-calcul en pixel du point inférieur droit
-        coo_tile_low_right = PixelXYToTileXY(coo_pixel_low_right[0],
-                                             coo_pixel_low_right[1])  # 3a-calcul de la tuile en bas à droite
+        # calcul en pixel du point inférieur droit
+        coo_pixel_bottom_right = (coo_pixel_centre[0] + (self.surface_x >> 1),
+                                  coo_pixel_centre[1] + (self.surface_y >> 1))
+        # calcul de la tuile du bas à droite
+        coo_tile_bottom_right = PixelXYToTileXY(coo_pixel_bottom_right[0],
+                                                coo_pixel_bottom_right[1])
 
-        # 4-boucle pour remplir le dictionnaire de tuiles + ajout des tuiles à la scène
-        for x in range(coo_tile_up_left[0], coo_tile_low_right[0] + 2):
-            for y in range(coo_tile_up_left[1], coo_tile_low_right[1] + 2):
+        # boucle pour remplir le dictionnaire de tuiles + ajout des tuiles à la scène
+        for x in range(coo_tile_up_left[0], coo_tile_bottom_right[0] + 1):
+            for y in range(coo_tile_up_left[1], coo_tile_bottom_right[1] + 1):
                 if self.dict_tiles.get((x, y), None) == None:
                     quadkey = TileXYToQuadKey(x, y, self.zoom)
                     tile = self.load_tile(quadkey)
@@ -90,30 +100,6 @@ class BingMap(QGraphicsScene):
                     coo_pixel_xy = TileXYToPixelXY(x, y)
                     img_item.setPos(coo_pixel_xy[0], coo_pixel_xy[1])
                     self.dict_tiles[(x, y)] = img_item
-        """        
-        # calcul de la tuile centrale
-        coo_pixel_xy = LatLongToPixelXY(self.coordonnees[0], self.coordonnees[1], self.zoom)
-        coo_tile_xy = PixelXYToTileXY(coo_pixel_xy[0], coo_pixel_xy[1])
-
-        # calcul du nombre de tuiles nécessaires en x :
-        nb_tiles_x = ceil(self.surface_x / 256)
-        nb_tiles_y = ceil(self.surface_y / 256)
-
-        # calcul de la tuile en haut à gauche
-        top_tile_x = coo_tile_xy[0] - ((nb_tiles_x - 1) >> 1)
-        top_tile_y = coo_tile_xy[1] - ((nb_tiles_y - 1) >> 1)
-
-        # ajout des tuiles à la scène
-        for x in range(nb_tiles_x + 1):
-            for y in range(nb_tiles_y + 1):
-                if self.dict_tiles.get((x + top_tile_x, y + top_tile_y), None) == None:
-                    quadkey = TileXYToQuadKey(x + top_tile_x, y + top_tile_y, self.zoom)
-                    tile = self.load_tile(quadkey)
-                    img_item = self.addPixmap(tile)
-                    coo_pixel_xy = TileXYToPixelXY(x + top_tile_x, y + top_tile_y)
-                    img_item.setPos(coo_pixel_xy[0], coo_pixel_xy[1])
-                    self.dict_tiles[(x + top_tile_x, y + top_tile_y)] = img_item
-        """
 
     def load_tile(self, quadkey):
         """

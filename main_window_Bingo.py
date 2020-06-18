@@ -27,16 +27,13 @@ class MainWindowBingo(QMainWindow, Ui_MainWindow):
 
     def on_View_mousePress(self, event):
         self.moveView = True
-        self.pos = event.pos()
-        print(self.pos)
+        self.pos = self.View.mapToScene(event.pos())
 
     def on_View_mouseRelease(self, event):
         if self.moveView:
-            newpos = event.pos()
-            print(newpos)
-            move = (self.scene.get_pixel_center()[0] - newpos.x() + self.pos.x(),
-                    self.scene.get_pixel_center()[1] - newpos.y() + self.pos.y())
-            self.scene.set_coordonnees(PixelXYToLatLong(move[0], move[1], self.scene.get_zoom()))
+            newpos = self.View.mapToScene(event.pos())
+            self.scene.move_center(newpos.x() - self.pos.x(), newpos.y() - self.pos.y())
+            print(str(newpos.x() - self.pos.x()) + ',' + str(newpos.y() - self.pos.y()))
             self.moveView = False
             coo = self.scene.get_coordonnees()
             self.lineEditLatitude.setText(str(coo[0]))
