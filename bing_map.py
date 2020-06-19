@@ -8,7 +8,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsPixmapItem
 
 from TileServeur import DataServer
-from TileSystem import LatLongToPixelXY, PixelXYToTileXY, TileXYToQuadKey, TileXYToPixelXY, PixelXYToLatLong
+from TileSystem import LatLongToPixelXY, PixelXYToTileXY, TileXYToQuadKey, TileXYToPixelXY, PixelXYToLatLong, MapSize
 
 
 class BingMap(QGraphicsScene):
@@ -49,13 +49,20 @@ class BingMap(QGraphicsScene):
             self.zoom = new_zoom
             if not path.exists("cache/" + str(self.zoom) + '/'):
                 mkdir('cache/' + str(self.zoom) + '/')
+            for tile in self.dict_tiles:
+                self.removeItem(self.dict_tiles.get(tile))
+            self.dict_tiles.clear()
+            self.surface_x = self.surface_y = MapSize(self.zoom)
+            self.setSceneRect(0,0,self.surface_x, self.surface_y)
 
+    """
     def update_surface(self, rect):
         self.surface_x = rect.width()
         self.surface_y = rect.height()
         center = self.get_pixel_center()
         self.setSceneRect(center[0] - (rect.width() >> 1), center[1] - (rect.height() >> 1), self.surface_x,
                           self.surface_y)
+    """
 
     def move_center(self, delta_x, delta_y):
         coo_pixel_centre = self.get_pixel_center()

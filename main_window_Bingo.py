@@ -10,7 +10,7 @@ class MainWindowBingo(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWindowBingo, self).__init__(parent)
         self.setupUi(self)
-        self.scene = BingMap((48.8584, 2.2945), 16, QRect(self.View.geometry().x(), self.View.geometry().y(),
+        self.scene = BingMap((48.8584, 2.2945), 2, QRect(self.View.geometry().x(), self.View.geometry().y(),
                                                           self.View.geometry().width(), self.View.geometry().height()))
         self.View.setScene(self.scene)
         self.lineEditLatitude.setText(str(self.scene.get_coordonnees()[0]))
@@ -40,8 +40,8 @@ class MainWindowBingo(QMainWindow, Ui_MainWindow):
             self.lineEditLongitude.setText(str(coo[1]))
 
     def on_View_resize(self, event):
-        self.scene.update_surface(
-            QRect(self.View.geometry().x(), self.View.geometry().y(), event.size().width(), event.size().height()))
+        #self.scene.update_surface(
+        #    QRect(self.View.geometry().x(), self.View.geometry().y(), event.size().width(), event.size().height()))
         self.scene.update_view()
         self.View.centerOn(self.scene.get_pixel_center()[0], self.scene.get_pixel_center()[1])
 
@@ -54,17 +54,17 @@ class MainWindowBingo(QMainWindow, Ui_MainWindow):
     @pyqtSlot(int)
     def on_spinBoxZoom_valueChanged(self, i):
         self.scene.set_zoom(i)
-        self.scene.update_surface(
-            QRect(self.View.geometry().x(), self.View.geometry().y(), self.View.geometry().width(),
-                  self.View.geometry().height()))
+        #self.scene.update_surface(
+        #    QRect(self.View.geometry().x(), self.View.geometry().y(), self.View.geometry().width(),
+        #          self.View.geometry().height()))
         self.scene.update_view()
         self.View.centerOn(self.scene.get_pixel_center()[0], self.scene.get_pixel_center()[1])
 
     def on_lineEditLatitude_textChanged(self):
         if self.lineEditLatitude.text() and self.lineEditLongitude.text():
             self.scene.set_coordonnees((float(self.lineEditLatitude.text()), float(self.lineEditLongitude.text())))
-        self.scene.update_surface(
-            QRect(self.View.geometry().x(), self.View.geometry().y(), self.View.geometry().width(),
-                  self.View.geometry().height()))
+        #self.scene.update_surface(
+        #    QRect(self.View.geometry().x(), self.View.geometry().y(), self.View.geometry().width(),
+        #          self.View.geometry().height()))
         self.scene.update_view()
         self.View.centerOn(self.scene.get_pixel_center()[0], self.scene.get_pixel_center()[1])

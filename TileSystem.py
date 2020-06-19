@@ -163,4 +163,3 @@ def QuadKeyToTileXY(quad_key):
         else:
             raise ValueError('Invalid Quadkey digit sequence')
     return tile_x, tile_y, level_of_detail
-
